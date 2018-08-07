@@ -1,0 +1,12 @@
+{
+  "name": "tasket",
+  "version": "0.0.0",
+  "description": "A-tisket a-tasket, I'll ask where your task's at",
+  "main": "index.js",
+  "author": "Damien Clarke",
+  "license": "MIT",
+  "dependencies": {
+    "node-notifier": "^5.2.1",
+    "node-schedule": "^1.3.0"
+  }
+}
