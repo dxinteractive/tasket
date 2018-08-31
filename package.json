@@ -15,7 +15,7 @@
     "commander": "^2.17.1",
     "node-notifier": "^5.2.1",
     "node-schedule": "^1.3.0",
-    "unmutable": "^0.33.0"
+    "unmutable": "^0.34.0"
   },
   "bin": {
     "tasket": "lib/index.js"

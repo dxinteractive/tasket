@@ -2288,9 +2288,9 @@ union-value@^1.0.0:
     is-extendable "^0.1.1"
     set-value "^0.4.3"
 
-unmutable@^0.33.0:
-  version "0.33.0"
-  resolved "https://registry.yarnpkg.com/unmutable/-/unmutable-0.33.0.tgz#8d815b25f63a68b944098188bd454072d8cc56b8"
+unmutable@^0.34.0:
+  version "0.34.0"
+  resolved "https://registry.yarnpkg.com/unmutable/-/unmutable-0.34.0.tgz#512ad3f5286215cab8ce554741d42c2ca8822a70"
   dependencies:
     fast-deep-equal "^1.0.0"
     is-plain-object "^2.0.4"

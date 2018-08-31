@@ -1,9 +1,8 @@
 import Schedule from 'node-schedule';
 import Notifier from 'node-notifier';
+import open from './open';
 
-var {exec} = require('child_process');
-
-export default () => {
+export default ({filepath}) => {
     var remind = () => {
         nc.notify({
             title: 'Tasket',
@@ -14,8 +13,6 @@ export default () => {
         });
     };
 
-    var openTime = () => exec('subl ~/Desktop/time.md');
-
     var rule = new Schedule.RecurrenceRule();
     rule.minute = 50;
 
@@ -24,11 +21,11 @@ export default () => {
     var j = Schedule.scheduleJob(rule, remind);
 
     nc.on('click', (obj, options, metadata) => {
-        openTime();
+        open({filepath});
     });
 
     nc.on('timeout', (obj, options, metadata) => {
-        openTime();
+        open({filepath});
     });
 
     remind();
