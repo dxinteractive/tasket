@@ -28,10 +28,14 @@ commander
 
 commander
     .command('stats')
-    .action((): ?Promise<*> => {
+    .option('-f, --from <n>', 'From date (inclusive)')
+    .option('-t, --to <n>', 'To date (exclusive)')
+    .action((args): ?Promise<*> => {
         log(`stats`);
         stats({
-            filepath
+            filepath,
+            fromDate: args.from,
+            toDate: args.to
         });
     });
 

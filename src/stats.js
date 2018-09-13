@@ -13,13 +13,17 @@ import max from 'unmutable/lib/max';
 import pipeWith from 'unmutable/lib/util/pipeWith';
 import range from 'unmutable/lib/util/range';
 
-export default ({filepath}) => {
+export default ({filepath, fromDate, toDate}) => {
     filepath = filepath.replace('~', os.homedir());
     fs.readFile(filepath, 'utf8', (err, data) => {
         if (err) throw err;
 
+        let tasks = new taskfile(data)
+            .from(fromDate)
+            .to(toDate);
+
         let categories = pipeWith(
-            new taskfile(data).sumByCategory(),
+            tasks.sumByCategory(),
             filter(get('category')),
             filter(_ => _.category !== "lunch"),
         );
@@ -40,6 +44,7 @@ export default ({filepath}) => {
             categories,
             forEach(cat => {
                 let {
+                    chunks,
                     duration,
                     category,
                     durationHours,
@@ -55,16 +60,23 @@ export default ({filepath}) => {
                 let hours = Number(durationHours).toFixed(1);
                 let hoursPad = range(5 - hours.length).map(_ => " ").join("");
 
+                let chunksPad = range(3 - `${chunks}`.length).map(_ => " ").join("");
+
                 let blocks = Math.floor((proportion / maxProportion) * 100);
                 let notBlocks = 100 - blocks;
                 let bar = range(blocks).map(_ => "█").join("");
                 let notBar = range(notBlocks).map(_ => " ").join("");
 
-                let categoryString = `| ${category}${categoryPad} | ${percentPad}${percent}% | ${hoursPad}${hours} hrs | ${bar}`;
+                let categoryString = `| ${category}${categoryPad} | ${percentPad}${percent}% | ${hoursPad}${hours} hrs | ${chunks} chunks | ${bar}`;
 
-                // nameColumnWidth
                 console.log(categoryString);
             })
         )
+
+
+        let switches = tasks.workTasks.length;
+        console.log("\n");
+        console.log(`Switches: ${switches}`);
+        console.log("\n");
     });
 };

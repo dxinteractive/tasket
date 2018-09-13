@@ -24,10 +24,15 @@ export default class Taskfile {
 
     _tasks: Array<*>;
 
-    constructor(raw: string) {
+    constructor(input: string|Arrasy<*>) {
+
+        if(Array.isArray(input)) {
+            this._tasks = input;
+            return;
+        }
 
         this._tasks = pipeWith(
-            raw.split("##"),
+            input.split("##"),
             map(day => {
                 let split = day.split("\n");
                 let date = split[0];
@@ -77,7 +82,29 @@ export default class Taskfile {
                         }
                         return soFar;
                     }, []),
-                    filter(task => task.duration > 0)
+                    filter(task => task.duration > 0),
+                    (tasks) => {
+                        let arr = [];
+                        for(let i = 1; i < tasks.length; i++) {
+                            let a = tasks[i-1];
+                            let b = tasks[i];
+
+                            if(`${a.category} ${a.comment}` !== `${b.category} ${b.comment}`) {
+                                arr.push(tasks[i]);
+                            }
+                        }
+                        return arr;
+                    },
+                    (tasks) => {
+                        let grouped = pipeWith(
+                            tasks,
+                            groupBy(get('category'))
+                        );
+                        return tasks.map(task => {
+                            task.chunks = grouped[task.category].length;
+                            return task;
+                        })
+                    }
                 );
             }),
             flatMap(identity())
@@ -88,8 +115,42 @@ export default class Taskfile {
         return parseInt(date.replace(/[^\d]/g, ""));
     }
 
+    static nonWorkCategories = ['start', 'lunch', 'coffee'];
+
     get tasks() {
         return this._tasks;
+    }
+
+    get workTasks() {
+        return this._tasks.filter(_ => {
+            return Taskfile.nonWorkCategories.indexOf(_.category) === -1
+        });
+    }
+
+    from(fromDate: ?string) {
+        if(!fromDate) {
+            return this;
+        }
+        return new Taskfile(
+            this._tasks.filter(task => task.dateNumber >= Taskfile.numberifyDate(fromDate))
+        );
+    }
+
+    to(toDate: ?string) {
+        if(!toDate) {
+            return this;
+        }
+        return new Taskfile(
+            this._tasks.filter(task => task.dateNumber < Taskfile.numberifyDate(toDate))
+        );
+    }
+
+    groupByCategory() {
+        return pipeWith(
+            this._tasks,
+            groupBy(get('category')),
+            toArray()
+        );
     }
 
     sumByCategory() {
@@ -100,14 +161,13 @@ export default class Taskfile {
         );
 
         return pipeWith(
-            this._tasks,
-            groupBy(get('category')),
-            toArray(),
+            this.groupByCategory(),
             map(tasks => pipeWith(
                 tasks,
                 reduce((obj, task) => {
                     obj.duration += task.duration;
                     obj.category = task.category;
+                    obj.chunks = task.chunks;
                     return obj;
                 }, {
                     duration: 0
